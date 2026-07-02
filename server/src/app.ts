@@ -24,3 +24,4 @@ app.use(
     origin: env.CORS_ORIGIN,
   }),
 );
+

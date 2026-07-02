@@ -7,7 +7,8 @@ import { Queue } from "bullmq";
 /**
  * Other Import
 */
-import { ioRedisConnection } from "../config/redis";
+import { ioRedisConnection } from "../config";
+
 
 
 export const ingestionQueue = new Queue(
