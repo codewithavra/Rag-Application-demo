@@ -3,6 +3,7 @@ import cors from "cors";
 import { toNodeHandler } from "better-auth/node";
 import { env } from "./config";
 import { auth } from "./auth";
+import { ChatRouter, documentRouter } from "./routes";
 
 
 export const app = e();
@@ -25,3 +26,5 @@ app.use(
   }),
 );
 
+app.use('/api/v1/documents', documentRouter)
+app.use("/api/v1/chats", ChatRouter);

@@ -6,10 +6,15 @@ import { fileParser } from "./fileParser.service";
 import { embedText,embedTexts } from "./embedding.service";
 import { splitTextIntoChunks } from "./textSplitter.service";
 import { vectorStore } from "./vectorStore.service";
+import { generateAnswer } from "./answer.service";
+import { retrieveRelevantChunks } from "./retrieval.service";
 export {
     fileParser,
     splitTextIntoChunks,
     embedText,
     embedTexts,
-    vectorStore
+    vectorStore,
+    generateAnswer,
+    retrieveRelevantChunks
+
 }
