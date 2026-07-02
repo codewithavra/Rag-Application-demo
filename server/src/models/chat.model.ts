@@ -1,6 +1,18 @@
+/**
+ * Node Imports
+ */
 import mongoose, { Schema } from "mongoose";
 
-const chatSchema = new Schema(
+
+/**
+ * Types
+ */
+import type { IChat, PersonaKey } from "../types";
+ 
+
+
+
+const chatSchema = new Schema<IChat>(
   {
     userId: {
       type: String,
@@ -11,8 +23,13 @@ const chatSchema = new Schema(
       type: String,
       default: "New Chat",
     },
+    persona: {
+      type: String,
+      enum: ["default", "concise", "expert", "friendly", "socratic"],
+      default: "default",
+    },
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
-export const ChatModel = mongoose.model("Chat", chatSchema);
+export const ChatModel = mongoose.model<IChat>("Chat", chatSchema);

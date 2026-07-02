@@ -1,6 +1,8 @@
-import { Schema } from "mongoose";
+import mongoose, { Schema } from "mongoose";
+import type { IChatMessage } from "../types";
 
-const chatMessaheSchema = new Schema(
+
+const chatMessageSchema = new Schema<IChatMessage>(
   {
     userId: {
       type: String,
@@ -34,7 +36,10 @@ const chatMessaheSchema = new Schema(
       },
     ],
   },
-  {
-    timestamps: true,
-  },
+  { timestamps: true }
 );
+
+// Efficient history fetch: all messages for a chat in order
+chatMessageSchema.index({ chatId: 1, createdAt: 1 });
+
+export const ChatMessageModel = mongoose.model<IChatMessage>("ChatMessage", chatMessageSchema);

@@ -1,6 +1,14 @@
+/**
+ * Node Imports
+ */
 import mongoose, { Schema } from "mongoose";
+/**
+ * Types
+ */
+import type { IDocumentChunk } from "../types";
 
-const documentChunkSchema = new Schema(
+
+const documentChunkSchema = new Schema<IDocumentChunk>(
   {
     userId: {
       type: String,
@@ -30,10 +38,10 @@ const documentChunkSchema = new Schema(
       required: true,
     },
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
-export const DocumentChunkModel = mongoose.model(
-  "DocumentChunk",
-  documentChunkSchema,
-);
+// Compound index for fast chunk retrieval per document in order
+documentChunkSchema.index({ documentId: 1, chunkIndex: 1 });
+
+export const DocumentChunkModel = mongoose.model<IDocumentChunk>("DocumentChunk", documentChunkSchema);

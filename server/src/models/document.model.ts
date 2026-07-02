@@ -1,6 +1,16 @@
+/**
+ * Node Imports
+ */
 import mongoose, { Schema } from "mongoose";
 
-const documentSchema = new Schema(
+/**
+ * Types
+ */
+import type { IDocument } from "../types";
+
+
+
+const documentSchema = new Schema<IDocument>(
   {
     userId: {
       type: String,
@@ -32,8 +42,12 @@ const documentSchema = new Schema(
     error: {
       type: String,
     },
+    chunkCount: {
+      type: Number,
+      default: 0,
+    },
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
-export const DocumentModel = mongoose.model("Document", documentSchema);
+export const DocumentModel = mongoose.model<IDocument>("Document", documentSchema);

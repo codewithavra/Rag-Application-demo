@@ -26,7 +26,7 @@ export const embedTexts = async (
   batchSize = 10,
 ): Promise<number[][]> => {
   const result: number[][] = [];
-  for (let i = 0; text.length; i++) {
+  for (let i = 0; i< text.length; i++) {
     const batch = text.slice(i, i + batchSize);
     const vectors = await embeddings.embedDocuments(batch);
     result.push(...vectors);
