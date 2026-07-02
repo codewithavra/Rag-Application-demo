@@ -11,8 +11,9 @@ export const requiredAuth = async (
   next: NextFunction,
 ) => {
   const session = await auth.api.getSession({ headers: req.headers });
-  if(!session?.user){
-    return next(new ApiError(401, "Unauthorized"))
+  if (!session?.user) {
+    return next(new ApiError(401, "Unauthorized"));
   }
+  req.userId = session.user.id;
   next();
 };
