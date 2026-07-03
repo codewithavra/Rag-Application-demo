@@ -1,6 +1,3 @@
-/**
- * Other Imports
- */
 import { embeddings } from "../config";
 import { ChatMessageModel, ChatModel } from "../models";
 import { ApiError, ApiResponse, asyncHandler } from "../utils";
@@ -8,6 +5,7 @@ import { generateAnswer, retrieveRelevantChunks } from "../services";
 import { PERSONA_KEYS } from "../personas";
 import type { PersonaKey } from "../types";
 import type { AuthRequest } from "../middleware/auth.middleware";
+import { isValidObjectId } from "mongoose";
 
 export const createChat = asyncHandler(async (req: AuthRequest, res) => {
   if (!req.user?.id) throw new ApiError(401, "Unauthorized");
@@ -28,7 +26,9 @@ export const createChat = asyncHandler(async (req: AuthRequest, res) => {
 export const updateChatPersona = asyncHandler(async (req: AuthRequest, res) => {
   if (!req.user?.id) throw new ApiError(401, "Unauthorized");
 
-  const chatId = req.params.chatId;
+  const { chatId } = req.params;
+  if (!isValidObjectId(chatId)) throw new ApiError(400, "Invalid chat ID");
+
   const persona: PersonaKey = PERSONA_KEYS.includes(req.body.persona)
     ? req.body.persona
     : "default";
@@ -53,9 +53,9 @@ export const askQuestion = asyncHandler(async (req: AuthRequest, res) => {
   const { question } = req.body;
 
   if (!chatId) throw new ApiError(400, "Chat ID is required");
+  if (!isValidObjectId(chatId)) throw new ApiError(400, "Invalid chat ID");
   if (!question) throw new ApiError(400, "Question is required");
 
-  // get chat to read its persona
   const chat = await ChatModel.findOne({ _id: chatId, userId: req.user.id });
   if (!chat) throw new ApiError(404, "Chat not found");
 
@@ -67,16 +67,12 @@ export const askQuestion = asyncHandler(async (req: AuthRequest, res) => {
   const queryVector = await embeddings.embedQuery(question);
   const chunks = await retrieveRelevantChunks(req.user.id, queryVector);
 
+  // ✅ pass as separate arguments, not a single object
   const answer = await generateAnswer(
     question,
-    {
-      chunks,
-      history: history.map((m) => ({
-        role: m.role as "user" | "assistant",
-        content: m.content,
-      })),
-      persona: (chat.persona as PersonaKey) ?? "default",
-    } as any,
+    chunks,
+    history.map((m) => ({ role: m.role as "user" | "assistant", content: m.content })),
+    (chat.persona as PersonaKey) ?? "default",
   );
 
   await ChatMessageModel.create({
@@ -110,6 +106,7 @@ export const getChatMessages = asyncHandler(async (req: AuthRequest, res) => {
     : req.params.chatId;
 
   if (!chatId) throw new ApiError(400, "Chat ID is required");
+  if (!isValidObjectId(chatId)) throw new ApiError(400, "Invalid chat ID");
 
   const messages = await ChatMessageModel.find({
     userId: req.user.id,
