@@ -23,6 +23,31 @@ export const createChat = asyncHandler(async (req: AuthRequest, res) => {
   res.status(201).json(new ApiResponse(true, chat, "Chat created"));
 });
 
+// Returns the signed-in user's conversations for the frontend history panel.
+export const getChats = asyncHandler(async (req: AuthRequest, res) => {
+  if (!req.user?.id) throw new ApiError(401, "Unauthorized");
+
+  const chats = await ChatModel.find({ userId: req.user.id })
+    .sort({ updatedAt: -1 })
+    .lean();
+
+  res.json(new ApiResponse(true, chats, "Chats fetched"));
+});
+
+// Delete messages first, then the conversation itself. Both queries are scoped to its owner.
+export const deleteChat = asyncHandler(async (req: AuthRequest, res) => {
+  if (!req.user?.id) throw new ApiError(401, "Unauthorized");
+
+  const chatId = Array.isArray(req.params.chatId) ? req.params.chatId[0] : req.params.chatId;
+  if (!chatId || !isValidObjectId(chatId)) throw new ApiError(400, "Invalid chat ID");
+
+  const chat = await ChatModel.findOneAndDelete({ _id: chatId, userId: req.user.id });
+  if (!chat) throw new ApiError(404, "Chat not found");
+
+  await ChatMessageModel.deleteMany({ chatId, userId: req.user.id });
+  res.json(new ApiResponse(true, undefined, "Chat deleted"));
+});
+
 export const updateChatPersona = asyncHandler(async (req: AuthRequest, res) => {
   if (!req.user?.id) throw new ApiError(401, "Unauthorized");
 
